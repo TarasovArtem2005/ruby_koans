@@ -1,6 +1,12 @@
-# frozen_string_literal: true
+class DiceSet
+  attr_accessor :values
+  def roll(value)
+    @values = Array.new(value) { rand(6 + 1) }
 
-a = "a string"
-b = "a string"
+  end
+end
 
-puts a == b
+
+d = DiceSet.new
+d.roll(5)
+puts d.values
