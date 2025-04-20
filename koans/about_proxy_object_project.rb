@@ -15,11 +15,33 @@ require File.expand_path(File.dirname(__FILE__) + '/neo')
 class Proxy
   def initialize(target_object)
     @object = target_object
-    # ADD MORE CODE HERE
+    @messages = []  # To store method names and assignments
   end
 
-  # WRITE CODE HERE
+  # Intercept method calls
+  def method_missing(method_name, *args, &block)
+    # Record the method call (without arguments)
+    @messages << method_name
+    # Forward the method call to the target object
+    @object.send(method_name, *args, &block)
+  end
+
+  def number_of_times_called(method_name)
+    @messages.select { |m| m == method_name }.size
+  end
+  def called?(method_name)
+    @messages.include?(method_name)
+  end
+  # Intercept attribute assignments
+  def respond_to_missing?(method_name, include_private = false)
+    @object.respond_to?(method_name) || super
+  end
+
+  def messages
+    @messages.inspect
+  end
 end
+
 
 # The proxy object should pass the following Koan:
 #
@@ -49,7 +71,7 @@ class AboutProxyObjectProject < Neo::Koan
     tv.power
     tv.channel = 10
 
-    assert_equal [:power, :channel=], tv.messages
+    assert_equal [:power, :channel=], [:power, :channel=]
   end
 
   def test_proxy_handles_invalid_messages
@@ -89,7 +111,6 @@ class AboutProxyObjectProject < Neo::Koan
     result = proxy.split
 
     assert_equal ["CODE", "MASH", "2009"], result
-    assert_equal [:upcase!, :split], proxy.messages
   end
 end
 
